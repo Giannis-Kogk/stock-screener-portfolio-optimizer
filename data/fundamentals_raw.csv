@@ -1,0 +1,110 @@
+ticker,name,sector,sub_industry,pe,forward_pe,pb,roe,peg_trailing,peg_ratio
+ACN,Accenture,Information Technology,IT Consulting & Other Services,18.663717,15.908417,4.7744637,0.26025,2.3739,2.42
+ADBE,Adobe Inc.,Information Technology,Application Software,13.543272,8.850235,8.061954,0.61902,0.5745,0.57
+AMD,Advanced Micro Devices,Information Technology,Semiconductors,112.66026,29.80383,12.643581,0.1196,0.5264,0.46
+AKAM,Akamai Technologies,Information Technology,Internet Services & Infrastructure,33.25681,12.338372,2.3917727,0.07852,1.0368,0.93
+MO,Altria,Consumer Staples,Tobacco,16.216496,13.280964,-58.82573,,2.9651,2.9
+APH,Amphenol,Information Technology,Electronic Components,33.808697,21.453106,11.209457,0.40078,0.7229,0.74
+ADI,Analog Devices,Information Technology,Semiconductors,47.119953,24.017115,5.730152,0.12227,0.6044,0.58
+AAPL,Apple Inc.,Information Technology,"Technology Hardware, Storage & Peripherals",39.9098,33.985245,46.46571,1.42257,2.8718,2.83
+AMAT,Applied Materials,Information Technology,Semiconductor Materials & Equipment,28.95523,14.892493,11.099753,0.41068,0.8366,0.78
+ADM,Archer Daniels Midland,Consumer Staples,Agricultural Products & Services,14.173828,12.839045,1.454396,0.10639,2.0439,2.01
+ANET,Arista Networks,Information Technology,Communications Equipment,52.84048,32.64784,15.140191,0.33519,1.4998,1.35
+ADSK,Autodesk,Information Technology,Application Software,34.330738,18.640942,16.35201,0.53854,0.8745,0.89
+AVGO,Broadcom,Information Technology,Semiconductors,44.209732,17.783762,16.57706,0.44245,0.36,0.32
+BF-B,Brown–Forman,Consumer Staples,Distillers & Vintners,19.867743,17.968317,3.5588813,0.18122,2.2952,2.32
+BG,Bunge Global,Consumer Staples,Agricultural Products & Services,17.470102,9.223827,1.1988399,0.0692,,1.37
+CDNS,Cadence Design Systems,Information Technology,Application Software,64.26242,32.83201,12.9001875,0.22869,2.3962,2.45
+CASY,Casey's,Consumer Staples,Food Retail,34.185936,30.186205,6.4105577,0.19983,3.2634,3.16
+CDW,CDW Corporation,Information Technology,Technology Distributors,20.086348,13.796409,8.163323,0.42472,,1.33
+CHD,Church & Dwight,Consumer Staples,Household Products,34.608894,27.829437,5.969261,0.17797,3.1417,3.12
+CIEN,Ciena,Information Technology,Communications Equipment,62.45638,23.534012,12.959799,0.22396,0.2993,0.27
+CSCO,Cisco,Information Technology,Communications Equipment,25.448137,16.317192,7.508828,0.27319,0.9289,0.91
+CLX,Clorox,Consumer Staples,Household Products,19.748201,17.800404,-340.9938,5.34363,1.3379,1.32
+KO,Coca-Cola Company (The),Consumer Staples,Soft Drinks & Non-alcoholic Beverages,29.272594,28.129253,11.423287,0.40592998,4.1113,4.05
+CTSH,Cognizant,Information Technology,IT Consulting & Other Services,11.562044,10.09364,1.927535,0.17372,0.8273,0.82
+COHR,Coherent Corp.,Information Technology,Electronic Components,44.58385,13.638747,3.7428954,0.092709996,0.49,0.47
+CL,Colgate-Palmolive,Consumer Staples,Household Products,38.807396,24.324482,275.51105,2.31736,1.7925,1.79
+STZ,Constellation Brands,Consumer Staples,Distillers & Vintners,13.063115,12.068895,2.8854632,0.24014999,1.7646,1.78
+GLW,Corning Inc.,Information Technology,Electronic Components,46.02834,25.026527,7.5346284,0.17875,0.6925,0.67
+COST,Costco,Consumer Staples,Consumer Staples Merchandise Retail,53.142822,44.059303,13.658924,0.28402,5.4469,5.34
+CRWD,CrowdStrike,Information Technology,Systems Software,4535.1997,140.81761,45.506725,0.01461,5.9321,5.9
+DDOG,Datadog,Information Technology,Application Software,254.34721,57.535583,14.020059,0.06426,0.9184,0.89
+DELL,Dell Technologies,Information Technology,"Technology Hardware, Storage & Peripherals",20.025581,11.326713,-154.4574,,0.3767,0.35
+DG,Dollar General,Consumer Staples,Consumer Staples Merchandise Retail,17.446753,16.196138,3.1907463,0.19692,1.6823,1.71
+DLTR,Dollar Tree,Consumer Staples,Consumer Staples Merchandise Retail,16.8919,17.55499,7.5986247,0.46032003,1.4499,1.39
+EL,Estée Lauder Companies (The),Consumer Staples,Personal Care Products,112.48,27.707165,10.092418,0.09284,2.1211,2.12
+P,Everpure,Information Technology,"Technology Hardware, Storage & Peripherals",146.61644,25.373863,23.151632,0.17714001,1.2714,1.19
+FFIV,"F5, Inc.",Information Technology,Communications Equipment,24.537539,15.378292,4.357527,0.19011,1.2851,1.28
+FICO,Fair Isaac,Information Technology,Application Software,19.740362,13.948371,-3.9578364,,0.7917,0.79
+FSLR,First Solar,Information Technology,Semiconductors,9.901098,7.379487,1.6910326,0.18709,0.3069,0.34
+FLEX,Flex Ltd.,Information Technology,Electronic Manufacturing Services,26.870502,9.71481,4.752513,0.19128999,,0.94
+FTNT,Fortinet,Information Technology,Systems Software,41.547386,32.586853,41.560966,1.53077,1.5121,1.43
+IT,Gartner,Information Technology,IT Consulting & Other Services,13.74212,11.540587,-351.99997,3.65755,0.7334,0.73
+GEN,Gen Digital,Information Technology,Systems Software,15.307107,9.035585,6.524232,0.46402,1.8219,1.77
+GIS,General Mills,Consumer Staples,Packaged Foods & Meats,,10.916746,2.4655519,-0.104949996,,11.74
+GDDY,GoDaddy,Information Technology,Internet Services & Infrastructure,15.631362,10.1148205,-100.12335,,0.6224,0.62
+HSY,Hershey Company (The),Consumer Staples,Packaged Foods & Meats,19.718666,18.408459,7.184906,0.37999,0.8784,0.86
+HPE,Hewlett Packard Enterprise,Information Technology,"Technology Hardware, Storage & Peripherals",24.783504,10.15342,2.408335,0.10936,0.4007,0.38
+HRL,Hormel Foods,Consumer Staples,Packaged Foods & Meats,35.774193,14.167636,1.5562729,0.042930003,1.5105,1.53
+HPQ,HP Inc.,Information Technology,"Technology Hardware, Storage & Peripherals",11.218474,9.319826,-288.1608,,3.0917,3.02
+IBM,IBM,Information Technology,IT Consulting & Other Services,21.098549,18.678291,6.5764627,0.34769002,2.3388,2.32
+INTC,Intel,Information Technology,Semiconductors,,32.9431,2.7255347,-0.0962,,1.36
+INTU,Intuit,Information Technology,Application Software,20.745445,12.680697,4.825476,0.23596,1.0874,1.07
+JBL,Jabil,Information Technology,Electronic Manufacturing Services,25.844103,11.366788,16.321005,0.66369003,,0.82
+KDP,Keurig Dr Pepper,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,32.914413,14.433409,1.955521,0.06013,1.0937,1.14
+KEYS,Keysight Technologies,Information Technology,Electronic Equipment & Instruments,40.23207,21.337269,7.705456,0.20897,0.606,0.57
+KMB,Kimberly-Clark,Consumer Staples,Household Products,20.893131,15.36939,12.41974,0.78379995,2.251,2.31
+KLAC,KLA Corporation,Information Technology,Semiconductor Materials & Equipment,37.90727,21.306297,30.21978,0.91382,1.4522,1.37
+KHC,Kraft Heinz,Consumer Staples,Packaged Foods & Meats,,12.152963,0.8237888,-0.08953,2.8027,2.8
+KR,Kroger,Consumer Staples,Food Retail,39.322224,12.914172,7.223186,0.14442,0.6715,0.66
+LRCX,Lam Research,Information Technology,Semiconductor Materials & Equipment,33.543964,18.394403,20.215557,0.7012,1.0265,0.96
+LITE,Lumentum,Information Technology,Communications Equipment,,14.763348,11.740044,-2.45788,,0.63
+MRVL,Marvell Technology,Information Technology,Semiconductors,51.05263,21.115934,7.3432693,0.16523,0.4151,0.38
+MKC,McCormick & Company,Consumer Staples,Packaged Foods & Meats,8.508137,14.662391,1.8076687,0.22623,3.0736,3.14
+MCHP,Microchip Technology,Information Technology,Semiconductors,45.9812,13.7947445,5.0118833,0.12569,0.1852,0.18
+MU,Micron Technology,Information Technology,Semiconductors,10.281178,3.6782742,6.2460155,0.8826,0.16,0.16
+MSFT,Microsoft,Information Technology,Systems Software,27.376825,21.679066,8.279901,0.34221,1.5417,1.61
+MDLZ,Mondelez International,Consumer Staples,Packaged Foods & Meats,21.226055,20.006958,3.2120774,0.15478,0.9803,0.98
+MPWR,Monolithic Power Systems,Information Technology,Semiconductors,76.13186,29.768364,18.146528,0.24466999,0.8435,0.79
+MNST,Monster Beverage,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,42.18182,35.6197,9.230158,0.24700001,29.1026,29.26
+MSI,Motorola Solutions,Information Technology,Communications Equipment,42.710377,27.156748,28.628666,0.7698,2.3383,2.31
+NTAP,NetApp,Information Technology,"Technology Hardware, Storage & Peripherals",25.698872,16.334091,23.886341,1.14818,2.0302,1.95
+NVDA,Nvidia,Information Technology,Semiconductors,20.542353,10.2423525,17.134874,1.17211,0.2113,0.22
+NXPI,NXP Semiconductors,Information Technology,Semiconductors,20.634148,14.293719,5.468535,0.28674,0.5429,0.52
+OKTA,"Okta, Inc.",Information Technology,Application Software,110.292175,41.816936,4.590092,0.043130003,1.3053,1.27
+ON,ON Semiconductor,Information Technology,Semiconductors,41.578945,15.013905,3.6604202,0.089090005,0.1542,0.14
+ORCL,Oracle Corporation,Information Technology,Application Software,19.625391,11.322194,6.124535,0.41192,0.6975,0.65
+PLTR,Palantir Technologies,Information Technology,Application Software,118.79578,66.538605,36.191807,0.40907001,1.406,1.39
+PANW,Palo Alto Networks,Information Technology,Systems Software,803.975,65.85155,9.533394,0.01739,1.6476,1.69
+PEP,PepsiCo,Consumer Staples,Soft Drinks & Non-alcoholic Beverages,18.217384,16.796953,8.861788,0.52187,1.5444,1.52
+PM,Philip Morris International,Consumer Staples,Tobacco,28.876642,21.873753,-38.84623,,2.5923,2.55
+PG,Procter & Gamble,Consumer Staples,Personal Care Products,25.609941,22.984047,7.251909,0.29609,4.3081,4.32
+PTC,PTC Inc.,Information Technology,Application Software,21.977602,19.579088,6.259289,0.2855,2.6184,2.61
+Q,Qnity Electronics,Information Technology,Semiconductor Materials & Equipment,44.36842,19.712414,3.2528524,0.06981,1.1386,1.16
+QCOM,Qualcomm,Information Technology,Semiconductors,13.585827,14.134859,6.0841355,0.52814996,1.0438,1.01
+ROP,Roper Technologies,Information Technology,Electronic Equipment & Instruments,19.104076,19.64581,2.492784,0.13229,1.8231,1.8
+CRM,Salesforce,Information Technology,Application Software,19.934126,13.60455,4.672328,0.19381,0.7783,0.77
+SNDK,Sandisk,Information Technology,"Technology Hardware, Storage & Peripherals",6.931631,3.0004284,6.8869915,1.41174,,
+STX,Seagate Technology,Information Technology,"Technology Hardware, Storage & Peripherals",27.496067,8.024754,34.88225,2.5935102,0.3142,0.29
+NOW,ServiceNow,Information Technology,Systems Software,73.76259,21.350185,8.125693,0.11846,0.7911,0.81
+SWKS,Skyworks Solutions,Information Technology,Semiconductors,79.20176,11.971276,2.355289,0.03,0.4355,0.41
+SJM,J.M. Smucker Company (The),Consumer Staples,Packaged Foods & Meats,61.94953,12.047181,2.4626074,0.03931,,2.17
+SMCI,Supermicro,Information Technology,"Technology Hardware, Storage & Peripherals",5.6371307,3.847339,1.4873364,0.32368,,0.91
+SNPS,Synopsys,Information Technology,Application Software,80.22439,24.352793,2.7927816,0.03661,2.404,2.43
+SYY,Sysco,Consumer Staples,Food Distributors,20.465425,14.2902775,9.364731,0.58736,1.0763,1.1
+TGT,Target Corporation,Consumer Staples,Consumer Staples Merchandise Retail,16.696262,16.7806,4.093617,0.26408002,2.2265,2.27
+TEL,TE Connectivity,Information Technology,Electronic Manufacturing Services,19.409214,14.240409,4.5511546,0.24610001,1.2558,1.25
+TDY,Teledyne Technologies,Information Technology,Electronic Equipment & Instruments,29.452839,23.191086,2.669796,0.09466,,1.4
+TER,Teradyne,Information Technology,Semiconductor Materials & Equipment,28.68161,20.732195,10.565247,0.42723998,0.4458,0.41
+TXN,Texas Instruments,Information Technology,Semiconductors,39.141373,25.942743,14.377322,0.39723998,0.9392,0.9
+TRMB,Trimble Inc.,Information Technology,Application Software,,13.848375,2.5761352,-0.029189998,1.407,1.36
+TWLO,Twilio,Information Technology,Systems Software,26.86872,31.212648,3.6090345,0.14915,0.3123,0.3
+TYL,Tyler Technologies,Information Technology,Application Software,53.173534,27.384315,6.0811834,0.104890004,1.5403,1.51
+TSN,Tyson Foods,Consumer Staples,Packaged Foods & Meats,36.71605,15.495515,1.1574236,0.03263,,1.04
+VRSN,Verisign,Information Technology,Internet Services & Infrastructure,33.64801,28.513649,-12.286377,,2.2369,2.18
+VYLR,Vylor,Consumer Staples,Agricultural Products & Services,129.33928,27.53019,2.0164256,0.04256,0.7793,0.78
+WMT,Walmart,Consumer Staples,Consumer Staples Merchandise Retail,46.22464,39.598614,10.314496,0.22313999,4.2679,4.27
+WDC,Western Digital,Information Technology,"Technology Hardware, Storage & Peripherals",10.329406,7.2680655,11.74895,1.29596,0.4494,0.42
+WDAY,"Workday, Inc.",Information Technology,Application Software,39.79735,14.755387,7.289871,0.16006,0.5738,0.57
+ZBRA,Zebra Technologies,Information Technology,Electronic Equipment & Instruments,26.016169,14.448884,4.2551336,0.16459,0.5679,0.57
