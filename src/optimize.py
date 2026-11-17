@@ -1,4 +1,4 @@
-# Day 7: Markowitz optimisation (block 1: data loading)
+# Markowitz optimisation of the screened stocks. Importing this file runs nothing.
 import sqlite3
 from pathlib import Path
 
@@ -6,166 +6,155 @@ import numpy as np
 import pandas as pd
 
 from scipy.optimize import minimize
-import matplotlib.pyplot as plt
 
-# Path to the database, built relative to this file so it works from any folder
+# Paths are built relative to this file, so the script works from any folder
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "portfolio.db"
 
+# Default parameters (judgement calls, see plan.md); the functions below receive them as arguments
 TRADING_DAYS = 252   # used to annualise daily statistics
-MAX_WEIGHT = 0.15    # per-stock cap (a judgement call, see plan.md)
-RISK_FREE = 0.04   # annual risk-free rate (judgement: Fed range 3.75-4%, 3M T-bill ~3.95%)
-
-# --- Load adjusted close prices of the 35 screened stocks (long format) ---
-conn = sqlite3.connect(DB_PATH)
-query = """
-SELECT p.ticker, p.date, p.adj_close
-FROM prices AS p
-JOIN screen_results AS s ON s.ticker = p.ticker
-"""
-prices_long = pd.read_sql(query, conn, parse_dates=["date"])
-conn.close()
-
-# Wide format: one row per date, one column per ticker
-prices = prices_long.pivot(index="date", columns="ticker", values="adj_close")
-
-# Daily simple returns; the first row is NaN by construction, so we drop it
-returns = prices.pct_change().dropna()
-
-tickers = list(returns.columns)   # fixes the order of the weight vector
-n = len(tickers)                  # number of assets (35)
-
-# --- Annualised inputs of the optimiser ---
-mu = returns.mean().values * TRADING_DAYS        # expected annual returns, shape (n,)
-cov = returns.cov().values * TRADING_DAYS        # annual covariance matrix, shape (n, n)
-
-# --- Sanity check: must reproduce the equal-weight result of Day 6 ---
-w_eq = np.full(n, 1 / n)                         # 1/N weights
-eq_return = w_eq @ mu                            # portfolio return = w . mu
-eq_vol = np.sqrt(w_eq @ cov @ w_eq)              # portfolio volatility = sqrt(w' Sigma w)
-print(f"prices {prices.shape}, returns {returns.shape}, NaN: {int(returns.isna().sum().sum())}")
-print(f"Equal weight: return {eq_return:.1%}, vol {eq_vol:.1%}, ratio {eq_return / eq_vol:.3f}")
+MAX_WEIGHT = 0.15    # per-stock cap
+RISK_FREE = 0.04     # annual risk-free rate (judgement: Fed range 3.75-4%, 3M T-bill ~3.95%)
 
 
-# --- Block 2: minimum variance portfolio (long-only, per-stock cap) ---
+def load_returns(db_path=DB_PATH):
+    """Daily simple returns of the screened stocks: one row per date, one column per ticker."""
+    query = """
+    SELECT p.ticker, p.date, p.adj_close
+    FROM prices AS p
+    JOIN screen_results AS s ON s.ticker = p.ticker
+    """
+    conn = sqlite3.connect(db_path)
+    try:
+        prices_long = pd.read_sql(query, conn, parse_dates=["date"])
+    finally:
+        conn.close()  # always close, even if the query fails
 
-def portfolio_variance(w, cov):
-    # Objective function: w' * Sigma * w (the quantity SLSQP will minimise)
+    # Wide format: one column per ticker
+    prices = prices_long.pivot(index="date", columns="ticker", values="adj_close")
+    # The first row of pct_change() is NaN by construction, so dropna() removes it
+    return prices.pct_change().dropna()
+
+
+def annual_inputs(returns):
+    """Annualised mean returns (Series by ticker) and covariance matrix (DataFrame, tickers x tickers)."""
+    mu = returns.mean() * TRADING_DAYS
+    cov = returns.cov() * TRADING_DAYS
+    return mu, cov
+
+
+def portfolio_stats(w, mu, cov, rf=RISK_FREE):
+    """Annual return, volatility and Sharpe ratio of a weight Series.
+
+    pandas aligns w, mu and cov by ticker label, so the order of the weights cannot be mixed up silently.
+    """
+    ret = float(w @ mu)                    # sum of weight_i * mean return_i
+    vol = float(np.sqrt(w @ cov @ w))      # sqrt(w' Sigma w)
+    return {"ann_return": ret, "ann_vol": vol, "sharpe": (ret - rf) / vol}
+
+def _optimise(objective, args, n, max_weight, extra_constraints=(), w_start=None):
+    """..."""   # (the docstring stays as it is)
+  
+    w0 = np.full(n, 1 / n) if w_start is None else w_start   # default start: equal weights (feasible)                    # start from equal weights (always feasible)
+    bounds = [(0.0, max_weight)] * n             # 0 <= w_i <= max_weight for every stock
+    constraints = (
+        {"type": "eq", "fun": lambda w: np.sum(w) - 1.0},   # 'eq': must equal 0 -> weights sum to 1
+        *extra_constraints,                                   # e.g. a target return (used for the frontier)
+    )
+    res = minimize(objective, w0, args=args, method="SLSQP", bounds=bounds,
+                   constraints=constraints, options={"maxiter": 1000, "ftol": 1e-12})
+    if not res.success:
+        # Fail loudly: silently continuing with unconverged weights would corrupt every later result
+        raise RuntimeError(f"Optimiser did not converge: {res.message}")
+    return res
+
+
+def _variance(w, cov):
+    # Objective for min variance: w' Sigma w
     return w @ cov @ w
 
-w0 = np.full(n, 1 / n)                      # starting point: equal weights (feasible)
-bounds = [(0.0, MAX_WEIGHT)] * n            # 0 <= w_i <= 15% for every stock
-constraints = (
-    # 'eq' means fun(w) must equal 0 -> weights sum to exactly 1 (fully invested)
-    {"type": "eq", "fun": lambda w: np.sum(w) - 1.0},
-)
 
-res_minvar = minimize(
-    portfolio_variance,
-    w0,
-    args=(cov,),                            # extra argument passed to the objective
-    method="SLSQP",
-    bounds=bounds,
-    constraints=constraints,
-    options={"maxiter": 1000, "ftol": 1e-12},   # ftol: stopping tolerance
-)
-
-w_minvar = res_minvar.x                     # optimal weight vector
-mv_return = w_minvar @ mu
-mv_vol = np.sqrt(w_minvar @ cov @ w_minvar)
-
-print("Converged:", res_minvar.success, "|", res_minvar.message)
-print(f"Sum of weights: {w_minvar.sum():.6f}, max weight: {w_minvar.max():.4f}")
-print(f"Min variance: return {mv_return:.2%}, vol {mv_vol:.1%}")
-print(f"Stocks with weight > 0.1%: {(w_minvar > 0.001).sum()}, at the cap: {(w_minvar > MAX_WEIGHT - 1e-6).sum()}")
-
-weights_minvar = pd.Series(w_minvar, index=tickers).sort_values(ascending=False)
-print(weights_minvar.head(10).round(4))
-
-# --- Block 3: maximum Sharpe portfolio (same bounds and constraints as block 2) ---
-
-def neg_sharpe(w, mu, cov, rf):
-    # Objective: minus the Sharpe ratio, because minimize() can only minimise
-    port_ret = w @ mu                       # expected annual portfolio return
-    port_vol = np.sqrt(w @ cov @ w)         # annual portfolio volatility
-    return -(port_ret - rf) / port_vol      # excess return per unit of risk (negated)
-
-res_sharpe = minimize(
-    neg_sharpe,
-    w0,                                     # start: equal weights
-    args=(mu, cov, RISK_FREE),
-    method="SLSQP",
-    bounds=bounds,                          # 0 <= w_i <= MAX_WEIGHT
-    constraints=constraints,                # sum of weights = 1
-    options={"maxiter": 1000, "ftol": 1e-12},
-)
-w_sharpe = res_sharpe.x
-
-def summarize(name, w):
-    # Return, volatility and Sharpe ratio of a weight vector, as one table row
-    r = w @ mu
-    v = np.sqrt(w @ cov @ w)
-    return {"portfolio": name, "return": r, "vol": v, "sharpe": (r - RISK_FREE) / v,
-            "n_stocks": int((w > 0.001).sum()), "at_cap": int((w >= MAX_WEIGHT - 1e-6).sum())}
-
-print("Converged:", res_sharpe.success, "|", res_sharpe.message)
-table = pd.DataFrame([
-    summarize("equal weight (1/N)", w_eq),
-    summarize("min variance", w_minvar),
-    summarize("max Sharpe", w_sharpe),
-]).set_index("portfolio")
-print(table.round(3))
-
-weights_sharpe = pd.Series(w_sharpe, index=tickers).sort_values(ascending=False)
-print(weights_sharpe.head(10).round(4))
+def _neg_sharpe(w, mu, cov, rf):
+    # Objective for max Sharpe. minimize() can only minimise, so we return the NEGATIVE Sharpe ratio
+    return -(w @ mu - rf) / np.sqrt(w @ cov @ w)
 
 
-# --- Block 4: efficient frontier (min variance for a grid of target returns) ---
+def min_variance_weights(cov, max_weight=MAX_WEIGHT):
+    """Weights (Series by ticker) of the long-only minimum variance portfolio."""
+    res = _optimise(_variance, (cov.values,), len(cov), max_weight)
+    # SLSQP may return -1e-12 instead of 0; clip back into the allowed range
+    return pd.Series(np.clip(res.x, 0.0, max_weight), index=cov.columns)
 
-def min_vol_for_target(target, w_start):
-    # Minimise variance subject to: weights sum to 1 AND portfolio return == target
-    cons = (
-        {"type": "eq", "fun": lambda w: np.sum(w) - 1.0},
-        {"type": "eq", "fun": lambda w: w @ mu - target},   # 'target' is fixed per call
-    )
-    return minimize(portfolio_variance, w_start, args=(cov,), method="SLSQP",
-                    bounds=bounds, constraints=cons, options={"maxiter": 1000, "ftol": 1e-12})
 
-# Highest return reachable under the same bounds: minimise the negative return (linear problem)
-res_maxret = minimize(lambda w: -(w @ mu), w0, method="SLSQP",
-                      bounds=bounds, constraints=constraints)
-max_ret = res_maxret.x @ mu
-print(f"Return range of the frontier: {mv_return:.2%} (min variance) to {max_ret:.2%} (max return)")
+def max_sharpe_weights(mu, cov, rf=RISK_FREE, max_weight=MAX_WEIGHT):
+    """Weights (Series by ticker) of the long-only maximum Sharpe portfolio."""
+    res = _optimise(_neg_sharpe, (mu.values, cov.values, rf), len(mu), max_weight)
+    return pd.Series(np.clip(res.x, 0.0, max_weight), index=mu.index)
 
-# Grid of targets; the last point is shifted slightly because at the extreme only one portfolio is feasible
-targets = np.linspace(mv_return, max_ret - 1e-4, 40)
+def efficient_frontier(mu, cov, max_weight=MAX_WEIGHT, n_points=40):
+    """DataFrame with the volatility of the minimum variance portfolio for each target return."""
+    n = len(mu)
+    mu_v, cov_v = mu.values, cov.values              # SLSQP works with plain arrays
 
-frontier = []
-w_prev = w_minvar                                  # warm start: previous solution is a good guess
-for t in targets:
-    res = min_vol_for_target(t, w_prev)
-    if res.success:
-        frontier.append((t, np.sqrt(res.fun)))     # res.fun is the variance -> take the square root
+    w_mv = min_variance_weights(cov, max_weight)
+    low = float(w_mv @ mu)                           # lowest return on the frontier
+    # Highest feasible return under the same bounds: minimise the NEGATIVE return, then flip the sign
+    high = -_optimise(lambda w: -(w @ mu_v), (), n, max_weight).fun
+    # The last target is shifted slightly: at the very extreme only one portfolio is feasible
+    targets = np.linspace(low, high - 1e-4, n_points)
+
+    rows, w_prev = [], w_mv.values                   # warm start: the previous solution is a good guess
+    for target in targets:
+        # t=target freezes the CURRENT target inside this constraint function
+        hit_target = {"type": "eq", "fun": lambda w, t=target: w @ mu_v - t}
+        res = _optimise(_variance, (cov_v,), n, max_weight, (hit_target,), w_start=w_prev)
+        rows.append((float(np.sqrt(res.fun)), float(target)))   # res.fun is the variance -> take sqrt
         w_prev = res.x
-frontier = np.array(frontier)                      # columns: return, volatility
-print(f"Frontier points solved: {len(frontier)} of {len(targets)}")
+    return pd.DataFrame(rows, columns=["ann_vol", "ann_return"])
 
-# Validation: max Sharpe must lie ON the frontier (same return -> same minimum volatility)
-chk = min_vol_for_target(w_sharpe @ mu, w_sharpe)
-print(f"Max Sharpe vol {np.sqrt(w_sharpe @ cov @ w_sharpe):.4f} vs frontier vol at the same return {np.sqrt(chk.fun):.4f}")
+def save_results(weights, mu, cov, frontier, data_end_date, rf=RISK_FREE,
+                 max_weight=MAX_WEIGHT, db_path=DB_PATH):
+    """Write the results to SQLite. Each table is rebuilt on every run (if_exists='replace')."""
+    # dict of Series -> one long table; the dict keys and the tickers become the two index levels
+    weights_long = pd.concat(weights, names=["portfolio", "ticker"]).rename("weight").reset_index()
 
-# --- Plot and save to a file (needed for the README) ---
-stock_vol = np.sqrt(np.diag(cov))                  # volatility of each single stock
-fig, ax = plt.subplots(figsize=(9, 6))
-ax.scatter(stock_vol, mu, s=15, alpha=0.5, label="individual stocks")
-ax.plot(frontier[:, 1], frontier[:, 0], lw=2, label=f"efficient frontier (cap {MAX_WEIGHT:.0%})")
-for name, w in {"1/N": w_eq, "min variance": w_minvar, "max Sharpe": w_sharpe}.items():
-    ax.scatter(np.sqrt(w @ cov @ w), w @ mu, s=120, marker="*", zorder=3, label=name)
-ax.set_xlabel("Annual volatility")
-ax.set_ylabel("Annual return")
-ax.legend()
-ax.grid(alpha=0.3)
+    # One row per portfolio, plus the parameters the numbers depend on
+    summary = pd.DataFrame(
+        [{"portfolio": name, **portfolio_stats(w, mu, cov, rf)} for name, w in weights.items()]
+    )
+    summary["rf"] = rf                          # risk-free rate used in the Sharpe ratio
+    summary["max_weight"] = max_weight          # per-stock cap used in the optimisation
+    summary["data_end_date"] = data_end_date    # last trading day in the data, as 'YYYY-MM-DD' text
 
-fig_dir = Path(__file__).resolve().parent.parent / "figures"
-fig_dir.mkdir(exist_ok=True)                       # create the folder if it does not exist
-fig.savefig(fig_dir / "efficient_frontier.png", dpi=150, bbox_inches="tight")
-plt.show()
+    conn = sqlite3.connect(db_path)
+    try:
+        weights_long.to_sql("optimal_weights", conn, if_exists="replace", index=False)
+        summary.to_sql("portfolio_summary", conn, if_exists="replace", index=False)
+        frontier.to_sql("efficient_frontier", conn, if_exists="replace", index=False)
+    finally:
+        conn.close()
+
+
+def main():
+    returns = load_returns()
+    mu, cov = annual_inputs(returns)
+
+    # Compute everything first, write afterwards: a failed optimisation never leaves half-written tables
+    weights = {
+        "equal_weight": pd.Series(1 / len(mu), index=mu.index),   # 1/N benchmark
+        "min_variance": min_variance_weights(cov),
+        "max_sharpe": max_sharpe_weights(mu, cov),
+    }
+    frontier = efficient_frontier(mu, cov)
+
+    for name, w in weights.items():
+        s = portfolio_stats(w, mu, cov)
+        print(f"{name:13s} return {s['ann_return']:.3f} | vol {s['ann_vol']:.3f} | "
+              f"Sharpe {s['sharpe']:.3f} | sum {w.sum():.6f} | min {w.min():.1e}")
+
+    save_results(weights, mu, cov, frontier, returns.index.max().strftime("%Y-%m-%d"))
+    print("Saved: optimal_weights, portfolio_summary, efficient_frontier")
+
+
+
+if __name__ == "__main__":
+    main()
