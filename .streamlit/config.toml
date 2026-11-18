@@ -1,0 +1,10 @@
+# .streamlit/config.toml
+# Project-level theme: overrides any global config in ~/.streamlit
+
+[theme]
+base = "dark"                          # start from Streamlit's built-in dark palette
+primaryColor = "#4F8EF7"               # accent: sliders, selected items, links
+backgroundColor = "#0E1117"            # main page background
+secondaryBackgroundColor = "#161B22"   # sidebar and widget backgrounds
+textColor = "#E6EDF3"                  # default text colour
+font = "sans serif"                    # built-in font family

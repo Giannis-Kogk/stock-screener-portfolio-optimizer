@@ -15,6 +15,11 @@ TRADING_DAYS = 252   # used to annualise daily statistics
 MAX_WEIGHT = 0.15    # per-stock cap
 RISK_FREE = 0.04     # annual risk-free rate (judgement: Fed range 3.75-4%, 3M T-bill ~3.95%)
 
+# Random-portfolio cloud for the chart (judgement calls, same logic as src/returns.py)
+N_CLOUD = 10_000     # how many random portfolios are stored in the database
+CLOUD_ALPHA = 0.5    # Dirichlet concentration: < 1 -> a few stocks get large weights
+CLOUD_SEED = 42      # fixed seed -> the same cloud on every run
+
 
 def load_returns(db_path=DB_PATH):
     """Daily simple returns of the screened stocks: one row per date, one column per ticker."""
@@ -52,9 +57,13 @@ def portfolio_stats(w, mu, cov, rf=RISK_FREE):
     return {"ann_return": ret, "ann_vol": vol, "sharpe": (ret - rf) / vol}
 
 def _optimise(objective, args, n, max_weight, extra_constraints=(), w_start=None):
-    """..."""   # (the docstring stays as it is)
-  
-    w0 = np.full(n, 1 / n) if w_start is None else w_start   # default start: equal weights (feasible)                    # start from equal weights (always feasible)
+    """Minimise `objective` over n weights with 0 <= w_i <= max_weight and sum(w) = 1.
+
+    extra_constraints: additional SLSQP constraints (the frontier uses a target return).
+    w_start: starting point; the default is the equal-weight portfolio.
+    Raises RuntimeError if the optimiser does not converge.
+    """
+    w0 = np.full(n, 1 / n) if w_start is None else w_start   # default start: equal weights (always feasible)
     bounds = [(0.0, max_weight)] * n             # 0 <= w_i <= max_weight for every stock
     constraints = (
         {"type": "eq", "fun": lambda w: np.sum(w) - 1.0},   # 'eq': must equal 0 -> weights sum to 1
@@ -111,7 +120,36 @@ def efficient_frontier(mu, cov, max_weight=MAX_WEIGHT, n_points=40):
         w_prev = res.x
     return pd.DataFrame(rows, columns=["ann_vol", "ann_return"])
 
-def save_results(weights, mu, cov, frontier, data_end_date, rf=RISK_FREE,
+
+def monte_carlo_cloud(mu, cov, max_weight=MAX_WEIGHT, n_target=N_CLOUD,
+                      alpha=CLOUD_ALPHA, seed=CLOUD_SEED):
+    """Random long-only portfolios with a per-stock cap: DataFrame with ann_vol and ann_return.
+
+    Same recipe as src/returns.py: Dirichlet weights (>= 0, sum 1), then reject any
+    portfolio in which some weight exceeds max_weight.
+    """
+    # mu and cov must list the tickers in the same order, otherwise W @ mu and W @ cov @ W would mismatch
+    if not (mu.index == cov.index).all() or not (mu.index == cov.columns).all():
+        raise ValueError("mu and cov are not aligned on the same tickers")
+
+    n = len(mu)
+    rng = np.random.default_rng(seed)                # fixed seed -> reproducible cloud
+    kept, total = [], 0
+    while total < n_target:
+        # each row: n weights, all >= 0, summing to exactly 1
+        batch = rng.dirichlet(np.full(n, alpha), size=50_000)
+        batch = batch[batch.max(axis=1) <= max_weight]   # keep only portfolios that respect the cap
+        kept.append(batch)
+        total += len(batch)
+    W = np.vstack(kept)[:n_target]                   # matrix: one portfolio per row
+
+    ret = W @ mu.values                              # (N,) one return per portfolio
+    # row i of (W @ cov) is w_i' Sigma; times W and summed over the row gives w_i' Sigma w_i
+    vol = np.sqrt(((W @ cov.values) * W).sum(axis=1))
+    return pd.DataFrame({"ann_vol": vol, "ann_return": ret})
+
+
+def save_results(weights, mu, cov, frontier, cloud, data_end_date, rf=RISK_FREE,
                  max_weight=MAX_WEIGHT, db_path=DB_PATH):
     """Write the results to SQLite. Each table is rebuilt on every run (if_exists='replace')."""
     # dict of Series -> one long table; the dict keys and the tickers become the two index levels
@@ -130,6 +168,7 @@ def save_results(weights, mu, cov, frontier, data_end_date, rf=RISK_FREE,
         weights_long.to_sql("optimal_weights", conn, if_exists="replace", index=False)
         summary.to_sql("portfolio_summary", conn, if_exists="replace", index=False)
         frontier.to_sql("efficient_frontier", conn, if_exists="replace", index=False)
+        cloud.to_sql("monte_carlo", conn, if_exists="replace", index=False)   # random portfolios for the chart
     finally:
         conn.close()
 
@@ -145,14 +184,22 @@ def main():
         "max_sharpe": max_sharpe_weights(mu, cov),
     }
     frontier = efficient_frontier(mu, cov)
+    cloud = monte_carlo_cloud(mu, cov)
 
     for name, w in weights.items():
         s = portfolio_stats(w, mu, cov)
         print(f"{name:13s} return {s['ann_return']:.3f} | vol {s['ann_vol']:.3f} | "
               f"Sharpe {s['sharpe']:.3f} | sum {w.sum():.6f} | min {w.min():.1e}")
 
-    save_results(weights, mu, cov, frontier, returns.index.max().strftime("%Y-%m-%d"))
-    print("Saved: optimal_weights, portfolio_summary, efficient_frontier")
+    # Sanity check: no random portfolio may lie ABOVE the frontier (the frontier is the best return per risk).
+    # np.interp reads the frontier's return at each cloud volatility (the frontier is sorted by volatility).
+    frontier_ret = np.interp(cloud["ann_vol"], frontier["ann_vol"], frontier["ann_return"])
+    n_above = int((cloud["ann_return"] > frontier_ret + 1e-3).sum())   # 1e-3 tolerates the straight-line interpolation
+    print(f"Cloud: {len(cloud)} portfolios | vol {cloud['ann_vol'].min():.3f}-{cloud['ann_vol'].max():.3f} | "
+          f"return {cloud['ann_return'].min():.3f}-{cloud['ann_return'].max():.3f} | above frontier: {n_above}")
+
+    save_results(weights, mu, cov, frontier, cloud, returns.index.max().strftime("%Y-%m-%d"))
+    print("Saved: optimal_weights, portfolio_summary, efficient_frontier, monte_carlo")
 
 
 
