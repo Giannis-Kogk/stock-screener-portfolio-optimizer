@@ -62,7 +62,11 @@ the results from the database and does not run the optimization itself.
 Run the scripts from the repository root, in this order. The download steps use
 yfinance, which is unofficial and returns live data, so a new run will give slightly
 different numbers than the ones reported above.
+First install the extra packages needed by the analysis scripts:
 
+```bash
+pip install -r requirements-pipeline.txt
+```
 ```bash
 python src/get_tickers.py        # S&P 500 list from Wikipedia -> data/sp500_universe.csv
 python src/fetch_fundamentals.py # P/E, P/B, ROE, PEG per stock -> data/fundamentals_raw.csv
@@ -82,7 +86,8 @@ python src/out_of_sample.py      # weights from period 1, evaluated on period 2
 
 ```text
 app.py                  Streamlit dashboard (reads tables from the database)
-requirements.txt        Python dependencies
+requirements.txt            Dependencies of the dashboard (app.py)
+requirements-pipeline.txt   Extra dependencies for rebuilding the data
 .streamlit/config.toml  Dark theme for the dashboard
 data/                   CSV files and the SQLite database (portfolio.db)
 src/                    Pipeline scripts, in the order listed above
