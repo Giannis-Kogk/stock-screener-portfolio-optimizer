@@ -41,7 +41,7 @@ Requires Python 3 (developed on 3.14) and an internet connection for the downloa
 
 ```bash
 # 1. Clone the repository and enter it
-git clone https://github.com/<your-username>/stock-screener-portfolio-optimizer.git
+git clone https://github.com/Giannis-Kogk/stock-screener-portfolio-optimizer.git
 cd stock-screener-portfolio-optimizer
 
 # 2. Create and activate a virtual environment, then install the dependencies
