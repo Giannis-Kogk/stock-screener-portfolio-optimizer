@@ -243,7 +243,10 @@ with tab_port:
     )
 
     # includes rf, max_weight and data_end_date, so the assumptions are visible
-    st.dataframe(summary, hide_index=True)
+    # .round(3) works on a copy used only for display: `summary` itself keeps full precision
+    # for the chart below. round() skips text columns (portfolio, data_end_date), and the
+    # table then shows at most 3 decimals (0.1704 -> 0.17, 1.2297 -> 1.23).
+    st.dataframe(summary.round(3), hide_index=True)
 
     choice = st.selectbox("Portfolio", summary["portfolio"])   # returns the selected name as a string
 
