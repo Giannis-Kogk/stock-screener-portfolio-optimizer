@@ -5,6 +5,8 @@ and Consumer Staples). It screens stocks on fundamentals (P/E, P/B, ROE, PEG), b
 minimum-variance and maximum-Sharpe portfolios with Markowitz optimization, and then
 tests how well those portfolios hold up on data they were not fitted on.
 
+**Live dashboard:** https://stock-screener-portfolio-optimizer-gfrknijkz8x9d9ck9yuvxx.streamlit.app/
+
 **Question:** which US stocks look cheap on fundamentals, and how should money be
 split among them for the best balance of return and risk?
 
