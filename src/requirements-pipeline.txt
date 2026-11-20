@@ -1,0 +1,7 @@
+# Full set for rebuilding the database and rerunning the analysis scripts in src/.
+# Includes the dashboard dependencies, then adds the data/analysis packages.
+# Versions pinned to the ones used during development (Python 3.14.4, 2026-11-20).
+-r requirements.txt
+yfinance==1.8.0
+scipy==1.18.1
+matplotlib==3.11.2
